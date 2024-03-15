@@ -23,7 +23,7 @@
         size="large"
         [rounded]="true"
       />
-      <span class="font-bold text-bluegray-50">Usuario</span>
+      <span class="font-bold text-bluegray-50">{{ username }}</span>
     </div>
   </ng-template>
 </p-toolbar>
@@ -144,7 +144,7 @@
                       pInputText
                       id="name"
                       class="bg-white-alpha-20 border-none p-3 text-primary-50"
-                      formControlName="task"
+                      formControlName="name"
                     />
                   </div>
                   <div class="inline-flex flex-column gap-2">
@@ -196,18 +196,18 @@
       let-editing="editing"
       let-ri="rowIndex"
     >
-      <tr class="flex justify-content-between">
+      <tr class="p-d-flex p-jc-between">
         <td>
           <p-cellEditor>
             <ng-template pTemplate="input">
               <input pInputText type="text" readonly class="p-disabled" />
             </ng-template>
             <ng-template pTemplate="output">
-              {{ task.id }}
+              <div class="p-tex-truncate">{{ task.id }}</div>
             </ng-template>
           </p-cellEditor>
         </td>
-        <td>
+        <td class="p-d-flex p-ai-flex">
           <p-cellEditor>
             <ng-template pTemplate="input">
               <input
@@ -223,29 +223,38 @@
             </ng-template>
           </p-cellEditor>
         </td>
-        <td>
+        <td class="p-d-flex p-ai-flex">
           <p-cellEditor>
             <ng-template pTemplate="input"> </ng-template>
             <input pInputText type="text" readonly class="p-disabled" />
             <ng-template pTemplate="output">
-              {{ task.description }}
+              <div class="p-text-truncate">{{ task.description }}</div>
             </ng-template>
           </p-cellEditor>
         </td>
-        <td [pEditableColumn]="task.state" pEditableColumnField="state">
+        <td
+          [pEditableColumn]="task.state"
+          pEditableColumnField="state"
+          class="p-d-flex p-ai-flex"
+        >
           <p-cellEditor>
             <ng-template pTemplate="input">
               <p-dropdown
+                *ngIf="!task.state"
                 [options]="states"
                 placeholder="Cambiar"
                 appendTo="body"
                 [style]="{ width: '100%' }"
-                (onChange)="changeState($event.value, task.id)"
+                (onChange)="updateTask(task, $event.value)"
               ></p-dropdown>
+              <ng-container *ngIf="task.state">
+                <!-- Agregar ng-container con ngIf aquí -->
+                <span style="color: green">Completado</span>
+              </ng-container>
             </ng-template>
             <ng-template pTemplate="output">
               <span
-                *ngIf="task.state === 'Completada'; else noCompletado"
+                *ngIf="task.state === true; else noCompletado"
                 style="color: green"
                 >Completado</span
               >

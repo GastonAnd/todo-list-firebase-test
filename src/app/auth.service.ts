@@ -37,4 +37,17 @@ export class AuthService {
   logout() {
     return signOut(this.auth);
   }
+
+  setToken(token: string, value: any) {
+    return localStorage.setItem('token', value);
+  }
+  getToken(token: string) {
+    return localStorage.getItem('token');
+  }
+  setUid(uid: string, value: any) {
+    return localStorage.setItem('uid', value);
+  }
+  getUid(uid: string) {
+    return localStorage.getItem('uid');
+  }
 }

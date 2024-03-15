@@ -21,6 +21,9 @@ import { InputTextModule } from 'primeng/inputtext';
 import { DialogModule } from 'primeng/dialog';
 import { MenuModule } from 'primeng/menu';
 import { AuthService } from '../auth.service';
+import { Users } from '../../interfaces/user';
+import { TaskService } from '../task.service';
+import { UtilsService } from '../utils.service';
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -45,15 +48,18 @@ import { AuthService } from '../auth.service';
   styleUrls: ['./home.component.scss'],
 })
 export class HomeComponent {
-  task!: Task[];
+  user = {} as Users;
+  task: Task[] = [];
   states!: SelectItem[];
   visible: boolean = false;
+  username: string;
 
   items: MenuItem[] | undefined;
 
   tasksForm = this.fb.group({
-    task: ['', Validators.required],
+    name: ['', Validators.required],
     description: ['', Validators.required],
+    state: [false],
   });
 
   constructor(
@@ -61,9 +67,13 @@ export class HomeComponent {
     private messageService: MessageService,
     private fb: FormBuilder,
     private form: FormBuilder,
-    private auth: AuthService
+    private auth: AuthService,
+    private taskService: TaskService,
+    private utilsService: UtilsService
   ) {
-    this.task = [];
+    this.getTasks();
+    this.getName();
+    this.username = '';
   }
   ngOnInit() {
     this.items = [
@@ -80,20 +90,40 @@ export class HomeComponent {
         ],
       },
     ];
-    this.states = [{ label: 'Finalizar', value: 'Completada' }];
+    this.states = [{ label: 'Finalizar', value: true }];
   }
 
   addTodo(): void {
     if (this.tasksForm.valid) {
-      const name = this.tasksForm.get('task')?.value;
-      const description = this.tasksForm.get('description')?.value;
-      this.task.push({
-        id: this.task.length + 1,
-        name: name!,
-        description: description!,
-        state: false,
+      const uid = this.auth.getUid('uid');
+      const path = `users/${uid}/tasks`;
+      this.taskService
+        .addTask(path, this.tasksForm.value)
+        .then(async (res) => {
+          this.closeDialog();
+          this.messageService.add({
+            severity: 'info',
+            summary: 'Aceptado',
+            detail: 'Tarea agregada correctamente',
+            life: 2000,
+          });
+        })
+        .catch((error) => {
+          console.log(error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Error',
+            detail: 'La tarea no fue agregada',
+            life: 2000,
+          });
+        });
+    } else {
+      this.messageService.add({
+        severity: 'info',
+        summary: 'Atención',
+        detail: 'Complete los campos',
+        life: 2000,
       });
-      this.closeDialog();
     }
   }
   showDialog() {
@@ -110,12 +140,36 @@ export class HomeComponent {
       })
       .catch((error) => console.log(error));
   }
-  changeState(newState: string, taskId: number) {
-    const taskIndex = this.task.find((task) => task.id === taskId);
-    console.log(newState);
-    console.log(taskId);
-    if (taskIndex) {
-      taskIndex.state = newState === 'Completada';
+
+  getTasks() {
+    const uid = this.auth.getUid('uid');
+    const path = `users/${uid}/tasks`;
+    this.taskService.getTasks(path).subscribe((response: any) => {
+      this.task = response;
+      console.log(response);
+    });
+  }
+  async getName() {
+    try {
+      const uid = this.auth.getUid('uid');
+      const name = await this.utilsService.getUserName(uid!);
+      this.username = name;
+    } catch (error) {
+      console.log(error);
     }
+  }
+
+  updateTask(task: Task, newState: boolean) {
+    task.state = newState;
+    console.log(task.state);
+    const path = `users/${this.auth.getUid('uid')}/tasks/${task.id}`;
+    this.taskService.updateTask(path, { state: newState }).then(() => {
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Éxito',
+        detail: 'Estado de la tarea actualizado correctamente',
+        life: 2000,
+      });
+    });
   }
 }

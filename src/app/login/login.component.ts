@@ -61,16 +61,23 @@ export class LoginComponent {
     if (this.loginForm.valid) {
       this.auth
         .login(this.loginForm.value as Users)
-        .then((response) => {
-          const tokenId = response.user.getIdToken();
-          this.route.navigate(['home']);
+        .then(async (response) => {
+          try {
+            const tokenId = await response.user.getIdToken();
+            const uid = await response.user.uid;
+            this.auth.setToken('user', tokenId);
+            this.auth.setUid('uid', uid);
+            this.route.navigate(['home']);
+          } catch (error) {
+            console.log(error);
+          }
         })
         .catch((error) => {
           console.log(error);
           this.messageService.add({
             severity: 'error',
             summary: 'Rechazado',
-            detail: 'El usuario o la contraseña ingresada es incorrecta',
+            detail: 'El Email o la contraseña ingresada es incorrecta',
             life: 2000,
           });
         });
@@ -78,7 +85,7 @@ export class LoginComponent {
       this.messageService.add({
         severity: 'info',
         summary: 'Rechazado',
-        detail: 'Complete con su usuario y contraseña',
+        detail: 'Complete los campos Email y Contraseña',
         life: 2000,
       });
     }
