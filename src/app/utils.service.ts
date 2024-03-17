@@ -7,6 +7,8 @@ import {
   getDoc,
   getFirestore,
 } from '@angular/fire/firestore';
+import { Users } from '../interfaces/user';
+import { User } from '@angular/fire/auth';
 @Injectable({
   providedIn: 'root',
 })
@@ -27,6 +29,16 @@ export class UtilsService {
       return userData.name; // Suponiendo que el campo se llama 'name'
     } else {
       throw new Error('User document not found');
+    }
+  }
+  async getUser(uid: string): Promise<Users> {
+    const userRef = doc(getFirestore(), 'users', uid);
+    const userDoc = await getDoc(userRef);
+    if (userDoc.exists()) {
+      const userData = userDoc.data() as Users;
+      return userData;
+    } else {
+      throw new Error('Usuario no encontrado');
     }
   }
 }

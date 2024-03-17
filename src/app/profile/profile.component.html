@@ -1,0 +1,51 @@
+<p-toolbar
+  class="w-full"
+  styleClass="bg-gray-900 shadow-2 "
+  [style]="{
+    'background-image':
+      'linear-gradient(to right, var(--bluegray-500), var(--bluegray-800))'
+  }"
+>
+  <ng-template pTemplate="start">
+    <img src="https://primefaces.org/cdn/primeng/images/primeng.svg" />
+    <label class="font-bold text-white" for="ToDoList">ToDoList</label>
+  </ng-template>
+
+  <ng-template pTemplate="end">
+    <div class="flex align-items-center gap-2">
+      <p-toast></p-toast>
+
+      <p-menu #menu [model]="items" [popup]="true"></p-menu>
+      <p-button
+        (click)="menu.toggle($event)"
+        icon="pi pi-user"
+        styleClass="mr-2"
+        size="large"
+        [rounded]="true"
+      />
+      <span class="font-bold text-bluegray-50">{{ username }}</span>
+    </div>
+  </ng-template>
+</p-toolbar>
+
+<p-card>
+  <div class="flex justify-content-center">
+    <h1>MI PERFIL</h1>
+  </div>
+  <div class="pr-5">
+    <h2>Nombre</h2>
+    <div class="flex justify-content-between align-items-center">
+      {{ user.name }}
+      <p-button icon="pi pi-pencil"> </p-button>
+    </div>
+    <h2>Apellido</h2>
+    <div class="flex justify-content-between align-items-center">
+      {{ user.surname }} <p-button icon="pi pi-pencil"> </p-button>
+    </div>
+
+    <h2>Email</h2>
+    <div class="flex justify-content-between align-items-center">
+      {{ user.email }} <p-button icon="pi pi-pencil"> </p-button>
+    </div>
+  </div>
+</p-card>

@@ -1,19 +1,14 @@
 import { Component } from '@angular/core';
 import { MenuItem, MessageService, SelectItem } from 'primeng/api';
 import { Router, RouterOutlet } from '@angular/router';
-import {
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Task } from '../../interfaces/task';
 import { CommonModule } from '@angular/common';
-import { CellEditor, TableModule } from 'primeng/table';
+import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
-import { Dropdown, DropdownModule } from 'primeng/dropdown';
+import { DropdownModule } from 'primeng/dropdown';
 import { PasswordModule } from 'primeng/password';
-import { Toolbar, ToolbarModule } from 'primeng/toolbar';
+import { ToolbarModule } from 'primeng/toolbar';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { CardModule } from 'primeng/card';
@@ -66,7 +61,6 @@ export class HomeComponent {
     private route: Router,
     private messageService: MessageService,
     private fb: FormBuilder,
-    private form: FormBuilder,
     private auth: AuthService,
     private taskService: TaskService,
     private utilsService: UtilsService
@@ -80,6 +74,13 @@ export class HomeComponent {
       {
         label: 'Opciones',
         items: [
+          {
+            label: 'Perfil',
+            icon: 'pi pi-user',
+            command: () => {
+              this.userSession();
+            },
+          },
           {
             label: 'Cerrar Sesión',
             icon: 'pi pi-sign-out',
@@ -101,6 +102,7 @@ export class HomeComponent {
         .addTask(path, this.tasksForm.value)
         .then(async (res) => {
           this.closeDialog();
+          this.tasksForm.reset();
           this.messageService.add({
             severity: 'info',
             summary: 'Aceptado',
@@ -140,7 +142,9 @@ export class HomeComponent {
       })
       .catch((error) => console.log(error));
   }
-
+  userSession() {
+    this.route.navigate(['profile']);
+  }
   getTasks() {
     const uid = this.auth.getUid('uid');
     const path = `users/${uid}/tasks`;
